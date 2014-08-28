@@ -1,0 +1,17 @@
+#!/bin/bash
+
+
+if [ $? -eq 0 ];then
+	echo "$(basename $0) usage:"
+	echo "    $(basename $0) list                list all images"
+	echo "    $(basename $0) delete [id | name]  delete image by id or name" 
+	echo "    $(basename $0) push id repo	     push image into repo by id"
+fi
+
+case $1 in 
+	list)
+		docker images ;;
+	*)
+		exit ;;
+esac
+
