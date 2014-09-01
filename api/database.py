@@ -2,9 +2,10 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 
 
-class DB:
+
+class DBAPI():
 	def __init__(self):
-		self.engine = create_engine(address)
+		self.engine = create_engine(CONF.connection)
 		self.connection = self.engine.connect()
 	def _execute(self,cmd):
 		result=self.connection.execute(cmd)

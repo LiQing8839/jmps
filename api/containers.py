@@ -7,30 +7,25 @@ from database import DB
 
 class ContainerAPI():
 	def __init__(self):
-		self.image_api=images.ImageAPI()
-		self.db_api=DB()
+		self.db_api=DBAPI()
 		self.rpc_api=rpc.RPCAPI()
-	def create(self,name,image_id,exposed_port,cmd_context):
-		kwargs = { 'name' :  name,
-		       'image' : image_id,
-			'port' : exposed_port,
-			'cmd'  : cmd_context,
+	def create_container(self,name,image_id,exposed_port,cmd_context):
+		kwargs = { 
+			'name' 	:  name,
+		       	'image' :  image_id,
+			'port' 	:  exposed_port,
+			'cmd'  	:  cmd_context,
 		}
-		rpc_client=self.rpc_api.get_client(
 		self.rpc_api.cast('build_container',**kwargs)	
-	def delete(self,container_id):
+	def delete_container(self,container_id):
 		self.rpc_api.cast('terminate_instance',instance=container_id)
 	def get_containers(self):
 		self.db.get_containers()
 	def get_container_by_id(self,id):
 		self.db.get_container_by_id(id)	
-	def create_container(self):
-		pass
-	def delete_container(self,id):
-		self.db.delete_container_by_id(id)
-	def start_instance(self,ctxt,instance):
+	def start_container(self,ctxt,instance):
 		cctxt.cast(ctxt,'start_instance',instance=instance)
-	def stop_instance(instance):
+	def stop_container(instance):
 		rpc.cast('stop_instance',instance=instance)
 
 URL="http://0.0.0.0:2375"
@@ -73,7 +68,7 @@ class ContainerController(object):
 
 		exposed_port=self._get_exposed_port(image_id)
 
-		self.compute_api.create(name,image_id,exposed_port,command_context)
+		self.compute_api.create_container(name,image_id,exposed_port,command_context)
 		#params=list(request.POST)[0]
 		#params_dict=ast.literal_eval(params)
 		#cmd=params_dict.get('cmd')
@@ -104,7 +99,3 @@ class ContainerController(object):
 		result=requests.get("http://0.0.0.0:2375/containers/{}/json".format(container_id))
 	def stop(self.request,response):
 		pass
-		
-		
-def create_resource():
-	return Controller()
