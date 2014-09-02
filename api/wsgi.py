@@ -1,5 +1,8 @@
 import webob
 
+class Application(object):
+	pass
+
 class Resource(object):
 	def __init__(self,controller):
 		self.controller = controller
