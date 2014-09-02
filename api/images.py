@@ -16,11 +16,7 @@ class ImageAPI():
     def get_image_by_id(self,image_id):
         headers={'Content-Type':'application/json'}
         result=requests.get("{}/images/json".format(self.url),headers=headers)
-        resp=webob.Response()
-        for res in result.json():
-            if image_id in res['Id']:
-		resp.json=res
-	return resp
+	return result
     def inspect_image(self,image_id):
 	result=requests.get("{}/images/{}/json".format(self.url,image_id))
 	return result
@@ -39,53 +35,53 @@ class ImageController(object):
 		method=request.environ['wsgiorg.routing_args'][1]['action']
 		method=getattr(self,method)		
 		response=webob.Response()
-		result=method(request)
-		response.json=result.json()
+		result_json=method(request)
+		response.json=result_json
 		return response
 	def __init__(self):
 		self.image_api=ImageAPI()
 	def index(self,request):
-		#headers={'Content-Type':'application/json'}
-		#try:
-		#	result=requests.get("http://0.0.0.0:2375/images/json",headers=headers)	
-		#except requests.ConnectionError:
-		#	errors={"errors":"403 Connection Refused By Docker"}
-		#	response.json=errors
-		#if result.status_code == 200:
-		#	response.json=result.json()
-		images=self.image_api.get_images()
-		return images
+		result=self.image_api.get_images()
+		result_json={}
+		if result.status_code == 200:
+			result_json=result.json()
+		return result_json
 	def show(self,request):
 		image_id=request.environ['wsgiorg.routing_args'][1]['image_id']
-		image = self.image_api.get_image_by_id(image_id)
-		return image
+		result = self.image_api.get_image_by_id(image_id)
+		result_json={}
+		if result.status_code == 200:
+			for res in result.json():
+				if image_id in res['Id']:
+					result_json = res	
+		return result_json
 	def inspect(self,request):
 		image_id=request.environ['wsgiorg.routing_args'][1]['image_id']
-		image = self.image_api.inspect_image(image_id)
-		return image
-		#result=requests.get("http://0.0.0.0:2375/images/{}/json".format(image_id))
-		#if result.status_code == 200:
-		#	response.json=result.json()
-		#if result.status_code == 404:
-		#	errors={"errors":"404 Not Found:no such image {}".format(image_id)}
-		#	response.json=errors
+		result = self.image_api.inspect_image(image_id)
+		result_json={}
+		if result.status_code == 200:
+			result_json=result.json()	
+		if result.status_code == 404:
+			errors={"errors":"404 Not Found:no such image {}".format(image_id)}
+			result_json=errors
+		return result_json
 	def create(self,request):
 		response.body="{create}\n"	
 	def delete(self,request):
 		image_id=request.environ['wsgiorg.routing_args'][1]['image_id']
         	result=self.image_api.delete_image(image_id)
-        	return result
-		#if result.status_code == 200:
-		#	response.json=result.json()
-		#if result.status_code == 404:
-		#	errors={"errors":"404 Not Found:no such image {}".format(image_id)}
-		#	response.json=errors
-		#if result.status_code == 409:
-		#	errors={"errors":"409 conflict"}
-		#	response.json=errors
-		#if result.status_code == 500:
-		#	errors={"errors":"500 internal server error"}
-		#	response.json=errors
+		if result.status_code == 200:
+			result_json = result.json()	
+		if result.status_code == 404:
+			errors={"errors":"404 Not Found:no such image {}".format(image_id)}
+			result_json=errors
+		if result.status_code == 409:
+			errors={"errors":"409 conflict"}
+			result_json=errors
+		if result.status_code == 500:
+			errors={"errors":"500 internal server error"}
+			result_json=errors
+		return result_json
 
 def create_resource():
 	return ImageController()

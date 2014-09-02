@@ -15,11 +15,16 @@ class Router (object):
 		self.misc_controller=MiscController()
 
 		#self.mapper.redirect("","/")
-
+		
 		self.mapper.connect('/containers',
 				controller=self.container_controller,
 				action='index',
 				conditions={'method':['GET']},
+		)
+		self.mapper.connect('/containers/{container_id}',
+				controller=self.container_controller,
+				action='delete',
+				conditions={'method':['DELETE']},
 		)
 
 		self.mapper.connect('/containers/{container_id}',
@@ -34,17 +39,13 @@ class Router (object):
 				conditions={'method':['GET']},
 		)
 
+
 		self.mapper.connect('/containers',
 				controller=self.container_controller,
 				action='create',
 				conditions={'method':['POST']},
 		)
 		
-		self.mapper.connect('/containers/{container_id}',
-				controller=self.container_controller,
-				action='delete',
-				conditions={'method':['DELETE']},
-		)
 		self.mapper.connect('/images',
 				controller=self.image_controller,
 				action='index',
@@ -97,6 +98,7 @@ class Router (object):
 	
 	@webob.dec.wsgify
 	def __call__(self,req):
+		print req.environ
 		return self.router
 
 	@staticmethod

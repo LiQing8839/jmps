@@ -19,9 +19,9 @@ class ContainerAPI():
     def delete_container(self,container_id):
 	result=requests.delete("{}/containers/{}".format(self.url,container_id))	
 	return result
-#    def get_containers(self):
-#	result=requests.get("{}/containers/json?all=1".format(self.url))	
-#	return result
+    def get_containers(self):
+	result=requests.get("{}/containers/json?all=1".format(self.url))	
+	return result
     def get_container_by_id(self,container_id):
 	result=requests.get("{}/containers/json?all=1".format(self.url))	
 	response=webob.Response()
@@ -41,12 +41,17 @@ class ContainerController(object):
     	self.compute_api=ContainerAPI()
     @webob.dec.wsgify
     def __call__(self,request):
+	print request.environ['wsgiorg.routing_args']
+	print request.method
     	method=request.environ['wsgiorg.routing_args'][1]['action']
+	print '----------------'
+	print method
+	print '----------------'
     	method=getattr(self,method)		
     	response=webob.Response()
-    	result=method(request)
+    	result_json=method(request)
     	response.headers.add("Content-Type","application/json")
-    	response.json=result.json()
+    	response.json=result_json
     	return response
     def index(self,request):
     	containers=self.compute_api.get_containers()
@@ -64,6 +69,18 @@ class ContainerController(object):
     	#	errors={"errors":"404 Not Found:no such container {}".format(container_id)}
     	#	response.json=errors
     	#	
+    def delete(self,request):
+    	container_id=request.environ['wsgiorg.routing_args'][1]['container_id']
+    	result=self.compute_api.delete_container(container_id)
+	if result.status_code == 204:
+		result_json = {"succeed":"{} deleted".format(container_id)}
+	if result.status_code == 400:
+		result_json = {"error":"400 bad parameter"}	
+	if result.status_code == 404:
+		result_json = {"error":"404 no such container"}
+	if result.status_code == 500:
+		result_json = {"error":"500 internal server error"}
+    	return result_json
     def create(self,request):
     	container_dict=body['container']
     	if 'name' not in container_dict:
@@ -95,8 +112,3 @@ class ContainerController(object):
     	#	error={"error":"500 internal server error"}
     	#	response.json=error
     		
-    def delete(self,request):
-    	print 'here----------------'
-    	container_id=request.environ['wsgiorg.routing_args'][1]['container_id']
-    	result=self.compute_api.delete_container(container_id)
-    	return result
