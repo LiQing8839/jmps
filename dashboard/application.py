@@ -8,6 +8,7 @@ SETTINGS = dict(
 	static_path = os.path.join(os.path.dirname(__file__),"static"),
 )
 
+print SETTINGS
 application=tornado.web.Application(
 		handlers=urls,
 		**SETTINGS
