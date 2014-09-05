@@ -9,7 +9,7 @@ class LoginHandler(RequestHandler):
 		password = self.get_argument('password')
 		self.authentication(username,password)
 	def authentication(self,username,password):
-		if username != 'niuminguo':
+		if username != 'test':
 			return self.redirect('/login')	
 		return self.redirect('/home')
 
